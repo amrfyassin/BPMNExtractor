@@ -1,0 +1,79 @@
+package com.amr.bpmextractor.engine;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.synonym.SynonymMap;
+import org.apache.lucene.analysis.synonym.WordnetSynonymParser;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
+
+import opennlp.tools.lemmatizer.DictionaryLemmatizer;
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTaggerME;
+
+public class Test2 {
+
+    public static void main(String[] args){
+        try{
+            // test sentence
+            String[] tokens = new String[]{"Most", "large", "cities", "in", "the", "US", "had",
+                    "morning", "and", "afternoon", "newspapers", "."};
+ 
+            // Parts-Of-Speech Tagging
+            // reading parts-of-speech model to a stream
+//            InputStream posModelIn = new FileInputStream("models"+File.separator+"en-pos-maxent.bin");
+            InputStream posModelIn = new FileInputStream("/Users/amr/Documents/Downloads/Apache/OpenNLP/models/en-pos-maxent.bin");
+            // loading the parts-of-speech model from stream
+            POSModel posModel = new POSModel(posModelIn);
+            // initializing the parts-of-speech tagger with model
+            POSTaggerME posTagger = new POSTaggerME(posModel);
+            // Tagger tagging the tokens
+            String tags[] = posTagger.tag(tokens);
+ 
+            // loading the dictionary to input stream
+//            InputStream dictLemmatizer = new FileInputStream("dictionary"+File.separator+"en-lemmatizer.txt");
+            InputStream dictLemmatizer = new FileInputStream("/Users/amr/Documents/Downloads/WordNet/en-lemmatizer.bin");
+//            InputStream dictLemmatizer = new FileInputStream("/Users/amr/Documents/Downloads/Apache/OpenNLP/models/en-pos-perceptron.bin");
+
+            // loading the lemmatizer with dictionary
+            DictionaryLemmatizer lemmatizer = new DictionaryLemmatizer(dictLemmatizer);
+ 
+            // finding the lemmas
+            String[] lemmas = lemmatizer.lemmatize(tokens, tags);
+ 
+            // printing the results
+            System.out.println("\nPrinting lemmas for the given sentence...");
+            System.out.println("WORD -POSTAG : LEMMA");
+            for(int i=0;i< tokens.length;i++){
+                System.out.println(tokens[i]+" -"+tags[i]+" : "+lemmas[i]);
+            }
+ 
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+}

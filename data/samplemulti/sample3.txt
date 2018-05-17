@@ -1,0 +1,6 @@
+Check Your Credit.
+Pick Your Payment.
+Get Pre-Approved.
+Choose Your Vehicle.
+
+from finance.yahoo.com

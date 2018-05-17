@@ -1,0 +1,14 @@
+1.  Acme Corp. operational division identifies a staffing need and notifies Human Resources (input)
+2.  Human Resources provides the operational division with a data sheet soliciting a detailed job description and a list of key skill sets needed by potential applicants
+3.  Human Resources receives completed data sheet and acquires approval through executive staff to solicit for candidates to fill the staffing need
+4.  Human Resources posts the solicitation on existing job boards and Acme Corp. web site with detailed job description, skill sets, and application deadline date
+5.  Upon application deadline date, Human Resources compiles list of applications and forwards to operational division for screening
+6.  Operational division screens qualified applicants and provides Human Resources with names of applicants for initial interviews
+7.  Human Resources schedules interviews with candidates and operational division
+8.  Upon completion of initial interviews, operational division notifies Human Resources of names of candidates for second interviews
+9.  Human Resources Division schedules second interview with candidates and operational division
+10. Following second interviews the operational division notifies Human Resources of its selection. 
+11. Human Resources notifies the selected candidate and sends the candidate an offer letter
+12. Human Resources receives the candidate’s signed offer letter
+13. Human Resources initiates the creation of a new personnel folder for the candidate and schedules a start date (output)
+14. Personnel Staffing Process ends and new employee is handed off to New Employee Onboarding Process

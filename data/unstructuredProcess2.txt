@@ -1,0 +1,7 @@
+Brainstorm and develop top-level product or system concepts to satisfy product requirements.
+Analyze, evaluate and select a preferred product concept considering product requirements, company technology and capabilities, development risks, and business strategy.
+Partition the system into subsystems or modules (and derive subsystem requirements
+Brainstorm and develop subsystem concepts to satisfy lower-level requirements.
+Analyze, evaluate and select subsystem concepts considering requirements, company technology and capabilities, development risks, and business strategy.
+Identify need for risk-reduction development or investigation and launch effort.
+Document the concept.

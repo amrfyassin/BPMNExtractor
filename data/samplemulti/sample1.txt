@@ -1,0 +1,8 @@
+Determine the Amount You Want To Borrow.
+Decide the Length of Loan You Want.
+Stay Within Your Price Range.
+Don't Forget Extra Expenses.
+Shop Around.
+Know Your Credit.
+
+from kbb.com
