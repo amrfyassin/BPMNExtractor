@@ -27,8 +27,8 @@ import com.amr.bpmextractor.bpmnbuilder.Role;
 public class BpmnMergerUsingAlpha {
 	
 	public static void main(String[] args) {
-//        String processFolder = "carloan";
-        String processFolder = "sameProcess";
+        String processFolder = "carloan";
+//        String processFolder = "sameProcess";
 	    String inputPathPrefix = "data/" + processFolder + "/sample";
         String outputPathPrefix = "out/" + processFolder + "/sample";
         ArrayList<Process> processes = new ArrayList<>();

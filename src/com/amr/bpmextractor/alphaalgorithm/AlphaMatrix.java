@@ -157,6 +157,12 @@ public class AlphaMatrix {
                         break;
                         
                     case CONNECTION.RIGHT:
+                       	if (elements[i].getOutGoingLinks().size() == 1) {
+                            Element split = Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY);
+                            outElements[i] = split;
+                            replaceLinks(elements[i], inElements[i], outElements[i]);
+                    	}
+                    	
                         Link.createLink(elements[i].getName() + " -> " + elements[j].getName(), outElements[i], inElements[j]);
                         break;
 

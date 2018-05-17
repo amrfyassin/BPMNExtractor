@@ -60,19 +60,9 @@ public class Role {
 	}
 	
 	public String toXMLCollaboration() {
-		String xml =  "\t\t<bpmn:participant id=\"" + uuid + "\" name=\"" + name + "\" processRef=\"" 
-	                   + processName + "\" />\n"; //FIXME: Handle process reference
-		
+		String xml =  "\t\t<bpmn:participant id=\"" + uuid + "\" name=\"" + name + "\" processRef=\"" + processName + "\" />\n";
 		return xml;
 	}
-	
-//	public String toXMLProcess() {
-//		String xml = "\t\t<bpmn:collaboration id=\"Collaboration_14s0yqv\">\n" + //FIXME: Handle process reference
-//				"\t\t\t<bpmn:participant id=\"" + uuid + "\" name=\"" + name + "\" processRef=\"Test Process\" />\n" + //FIXME: Handle process reference
-//				"\t\t</bpmn:collaboration>\n";
-//		
-//		return xml;
-//	}
 
 	public String toXMLDiagram() {
 		String xml = "\t\t\t<bpmndi:BPMNShape id=\"" + uuidDiagram + "i\" bpmnElement=\"" + uuid + "\">\n" + 

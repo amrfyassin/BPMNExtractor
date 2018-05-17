@@ -119,7 +119,6 @@ public class Process {
                         if (incomingLinks[i].getSourceElement().getName().equals(incomingLinks[j].getSourceElement().getName()))
                             incomingLinks[i].delete();
                 }
-                
             }
             
             int outlinks = element.getOutGoingLinks().size();
@@ -128,8 +127,13 @@ public class Process {
                 
                 Link[] outgoingLinks = new Link[element.getOutGoingLinks().size()];
                 outgoingLinks = element.getOutGoingLinks().toArray(outgoingLinks);
-            }
             
+	            for (int i = 0; i < outlinks; i++) {
+	                for (int j = i + 1; j < outlinks; j++)
+	                    if (outgoingLinks[i].getTargetElement().getName().equals(outgoingLinks[j].getTargetElement().getName()))
+	                    	outgoingLinks[i].delete();
+	            }
+            }
         }
     }
 
