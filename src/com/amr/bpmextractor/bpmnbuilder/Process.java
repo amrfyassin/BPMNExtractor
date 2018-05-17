@@ -28,10 +28,12 @@ import java.util.UUID;
 public class Process {
 
     private String name;
+    private String uuid;
     private ArrayList<Role> roles;
 
     public Process(String name){
         this.name = name;
+        this.uuid = UUID.randomUUID().toString();
         this.roles = new ArrayList<>();
     }
     
