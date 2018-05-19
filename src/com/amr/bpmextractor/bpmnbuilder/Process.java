@@ -147,75 +147,77 @@ public class Process {
         int incrementX = 200;
         int incrementY = 300;
         
+        
         if (roles != null && roles.size() > 0) {
             for (int i = 0, len = roles.size(); i < len; i++ ) {
-                ArrayList<Element> roleElements = roles.get(i).getElements();
-                int maxX = locationX;
-                int maxY = locationY;
-                
-                if (roleElements != null && roleElements.size() > 0) {
-                    
-                    Element currentElement = roleElements.get(0);
-                    currentElement.setLocation(locationX, locationY);
-                    ArrayList<Link> links = currentElement.getOutGoingLinks();
-                    
-                    boolean newLine = false;
-                    while (links.size() > 0) {
-                        
-                        if (links.size() == 1) {    // single task
-                            locationX += incrementX;
-                            currentElement = links.get(0).getTargetElement();
-                            currentElement.setLocation(locationX, locationY);
-                            if (newLine) currentElement.setInLocation(Element.CONN_LOCATION.TOP);
-                            
-                            if (locationX > 3000) {
-                                locationX = 100;
-                                locationY += incrementY;
-                                links.get(0).getTargetElement().setOutLocation(Element.CONN_LOCATION.BOTTOM);
-                                incrementY = 300;
-                                newLine = true;
-                            } else {
-//                                locationX += 200;
-                                newLine = false;
-                            }
-                            
-                        } else {    // parallel tasks
-                            int y = locationY;
-                            locationX += incrementX;
-                            for (int j = 0; j < links.size(); j ++) {
-                                currentElement = links.get(j).getTargetElement();
-                                currentElement.setLocation(locationX, y);
-//                                if (newLine) currentElement.setInLocation(Element.CONN_LOCATION.TOP);
-                                y += incrementY;
-                            }
-                            
-                            if (y - locationY > incrementY + originalY) incrementY = y - locationY + 300;
-                            
-                            if (locationX > 3000) {
-                                locationX = 300;
-                                locationY += incrementY;
-                                links.get(0).getTargetElement().setOutLocation(Element.CONN_LOCATION.BOTTOM);
-                                incrementY = 300;
-                                newLine = true;
-                            } else {
-//                                locationX += 200;
-                                newLine = false;
-                            }
-                        }
-                        
-                        if (locationX > maxX) maxX = locationX;
-                        if (locationY > maxY) maxY = locationY;
-                        links = currentElement.getOutGoingLinks();
-                    }
-                }
-                
-                roles.get(i).setLocation(roleElements.get(0).getLocationX() - 100, roleElements.get(0).getLocationY() - 100);
-                roles.get(i).setWidth(maxX - roleElements.get(0).getLocationX() + 300);
-                roles.get(i).setHeight(maxY - roleElements.get(0).getLocationY() + 300);
+				ArrayList<Element> roleElements = roles.get(i).getElements();
+				int minX = originalX;
+				int minY = originalY;				
+				int maxX = locationX;
+				int maxY = locationY;
+
+				if (roleElements != null && roleElements.size() > 0) {
+					boolean newLine = false;
+					for (Element currentElement : roleElements) {
+						ArrayList<Link> links = currentElement.getOutGoingLinks();
+
+						if (links.size() == 1) { // single task
+							locationX += incrementX;
+							currentElement = links.get(0).getTargetElement();
+							currentElement.setLocation(locationX, locationY);
+							if (newLine) currentElement.setInLocation(Element.CONN_LOCATION.TOP);
+
+							if (locationX > 3000) {
+								locationX = 100;
+								locationY += incrementY;
+								links.get(0).getTargetElement().setOutLocation(Element.CONN_LOCATION.BOTTOM);
+								incrementY = 300;
+								newLine = true;
+							} else {
+								// locationX += 200;
+								newLine = false;
+							}
+
+						} else { // parallel tasks
+							int y = locationY;
+							locationX += incrementX;
+							for (int j = 0; j < links.size(); j++) {
+								Element nextElement = links.get(j).getTargetElement();
+								nextElement.setLocation(locationX, y);
+								// if (newLine) currentElement.setInLocation(Element.CONN_LOCATION.TOP);
+								y += incrementY;
+							}
+
+							if (y - locationY > incrementY + originalY)
+								incrementY = y - locationY + 300;
+
+							if (locationX > 3000) {
+								if (locationX > maxX) maxX = locationX;
+								if (locationY > maxY) maxY = locationY;
+								locationX = 300;
+								locationY += incrementY;
+								links.get(0).getTargetElement().setOutLocation(Element.CONN_LOCATION.BOTTOM);
+								incrementY = 300;
+								newLine = true;
+							} else {
+								// locationX += 200;
+								newLine = false;
+							}
+						}
+
+						if (locationX > maxX) maxX = locationX;
+						if (locationY > maxY) maxY = locationY;
+					}
+
+				}
+				
+                roles.get(i).setLocation(minX - 100, minY - 100);
+                roles.get(i).setWidth(maxX - minX + 300);
+                roles.get(i).setHeight(maxY - minY + 600);
             }
         }
-    }
-    
+    }   
+ 
     @Override
     public String toString() {
         String str = "";
