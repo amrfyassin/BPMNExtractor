@@ -155,20 +155,39 @@ public class AlphaMatrix {
             for(int j = 0; j < i; j ++) {
                 switch (navCube[i][j]) {
                     case CONNECTION.LEFT:                       	
-                    	addInputJoin(role, i);
-                    	addOutputSplit(role, j);
+//                    	addInputJoin(role, i); // TODO Check if needed
+//                    	addOutputSplit(role, j); // TODO Check if needed
                         Link.createLink(elements[j].getName() + " -> " + elements[i].getName(), outElements[j], inElements[i]);
                         break;
                         
                     case CONNECTION.RIGHT:
-                    	addOutputSplit(role, i);
-                    	addInputJoin(role, j);
+//                    	addOutputSplit(role, i); // TODO Check if needed
+//                    	addInputJoin(role, j); // TODO Check if needed
                         Link.createLink(elements[i].getName() + " -> " + elements[j].getName(), outElements[i], inElements[j]);
                         break;
 
-                    case CONNECTION.PARALLEL: 
-                        Element split = Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY);
-                        Element join = Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY);
+                    case CONNECTION.PARALLEL:
+                    	Element split;
+                    	if (inElements[i].getName().equalsIgnoreCase("split")) {
+                    		split = inElements[i];
+                    		
+                    	} else if (inElements[j].getName().equalsIgnoreCase("split")) {
+                    		split = inElements[j];
+                    		
+                    	} else {
+                    		split = Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY);
+                    	}
+                    	
+                        Element join; 
+                        if (outElements[i].getName().equalsIgnoreCase("join")){
+                        	join = outElements[i];
+                        	
+                        } else if (outElements[j].getName().equalsIgnoreCase("join")) {
+                        	join = outElements[j];
+                        	
+                        } else {
+                        	join = Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY);
+                        }
                         
                    		replaceLinks(elements[i], split, join);
                    		replaceLinks(elements[j], split, join);
