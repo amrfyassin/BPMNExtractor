@@ -170,13 +170,8 @@ public class AlphaMatrix {
                         Element split = Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY);
                         Element join = Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY);
                         
-//                       	if (elements[i].getOutGoingLinks().size() == 1 && outElements[i] == elements[i]) {
-                       		replaceLinks(elements[i], join, split);
-//                       	}
-                       	
-//                       	if (elements[j].getOutGoingLinks().size() == 1 && outElements[j] == elements[j]) {
-                       		replaceLinks(elements[j], join, split);
-//                       	}
+                   		replaceLinks(elements[i], split, join);
+                   		replaceLinks(elements[j], split, join);
                         
                         Link.createLink(split + " -> " + elements[i].getName(), split, inElements[i]);
                         Link.createLink(split + " -> " + elements[j].getName(), split, inElements[j]);
