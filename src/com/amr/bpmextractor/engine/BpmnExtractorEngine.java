@@ -150,10 +150,12 @@ public class BpmnExtractorEngine {
             currentSentence = 0;
             do {
                 int j = 0;
+//                System.out.println("currentSentence = " + currentSentence);
                 do {
                     j = extractNextTask(currentSentence, j);
                 } while (j < tokens.get(currentSentence).length);
-
+                
+                addTaskToProcess();
             } while (++currentSentence < sentences.length);
 
             addEndEventToProcess();
@@ -357,6 +359,7 @@ public class BpmnExtractorEngine {
     
     private void addTaskToProcess() {
         String currentTaskName = getCurrentTaskName();
+        if (currentTask == null || currentTask.size() == 0) return;
         
         boolean hasVerb = false;
         for (int i = 0; i < currentTask.size(); i++) {

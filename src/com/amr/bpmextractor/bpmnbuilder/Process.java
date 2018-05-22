@@ -190,7 +190,10 @@ public class Process {
     private void calcElement(Element currentElement) {
     	ArrayList<Link> inLinks = currentElement.getIncomingLinks();
 
-    	if (inLinks.size()  == 1) { // Single Predecessor
+    	if (inLinks.size() == 0) {
+    		return;
+    		
+    	} else if (inLinks.size()  == 1) { // Single Predecessor
 			Element previousElement = inLinks.get(0).getSourceElement();
 			int numberOFSiblings = 0;
 			int orderWithinSiblings = 0;
