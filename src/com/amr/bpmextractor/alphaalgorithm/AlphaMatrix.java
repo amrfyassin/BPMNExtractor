@@ -155,14 +155,14 @@ public class AlphaMatrix {
             for(int j = 0; j < i; j ++) {
                 switch (navCube[i][j]) {
                     case CONNECTION.LEFT:                       	
-//                    	addInputJoin(role, i); // TODO Check if needed
-//                    	addOutputSplit(role, j); // TODO Check if needed
+                    	addInputJoin(role, i); // TODO Check if needed
+                    	addOutputSplit(role, j); // TODO Check if needed
                         Link.createLink(elements[j].getName() + " -> " + elements[i].getName(), outElements[j], inElements[i]);
                         break;
                         
                     case CONNECTION.RIGHT:
-//                    	addOutputSplit(role, i); // TODO Check if needed
-//                    	addInputJoin(role, j); // TODO Check if needed
+                    	addOutputSplit(role, i); // TODO Check if needed
+                    	addInputJoin(role, j); // TODO Check if needed
                         Link.createLink(elements[i].getName() + " -> " + elements[j].getName(), outElements[i], inElements[j]);
                         break;
 
@@ -216,7 +216,13 @@ public class AlphaMatrix {
 
 	private void addOutputSplit(Role role, int index) {
 		if (outElements[index].getOutGoingLinks().size() == 1 && outElements[index] == elements[index]) {
-		    Element split = Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY);
+		    Element split = null;
+//		    Link link = elements[index].getOutGoingLinks().get(0);
+//			if (link.getSourceElement().getName().equalsIgnoreCase("split")) {
+//				split = link.getSourceElement();
+//			}
+		    
+		    split = split == null ? Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY) : split;
 		    replaceLinks(elements[index], inElements[index], split);
 		    Link.createLink("split" + " -> " + elements[index].getName(), outElements[index], split);
 		    outElements[index] = split;
@@ -225,7 +231,13 @@ public class AlphaMatrix {
 
 	private void addInputJoin(Role role, int index) {
 		if (inElements[index].getIncomingLinks().size() == 1 && inElements[index] == elements[index]) {
-			Element join = Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY);
+			Element join = null;
+//			Link link = elements[index].getIncomingLinks().get(0);
+//			if (link.getSourceElement().getName().equalsIgnoreCase("join")) {
+//				join = link.getSourceElement();
+//			}
+			
+			join = join == null ? Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY) : join;
 			replaceLinks(elements[index], join, outElements[index]);
 		    Link.createLink("join" + " -> " + elements[index].getName(), join, inElements[index]);
 		    inElements[index] = join;
