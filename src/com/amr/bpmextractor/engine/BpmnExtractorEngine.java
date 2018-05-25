@@ -261,6 +261,7 @@ public class BpmnExtractorEngine {
             case "CC":
                 if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("and")) j = handleAND(i, j);
                 if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("or")) j = handleOR(i, j);
+                joinParallelTasksToProcess("OR", "Join");
                 break;
                 
             case "VBN":
@@ -273,8 +274,8 @@ public class BpmnExtractorEngine {
         }
         
         if (currentTask.size() >= 6) addTaskToProcess();
-        j++;
-        return j;
+        
+        return ++j;
     }
 
     private int handleAND(int i, int j) {
@@ -294,23 +295,29 @@ public class BpmnExtractorEngine {
     }
     
     private int handleOR(int i, int j) {
+    	
+    	// Or between two nouns in the same task
         if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("or") && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
-            appendToTaskName(i, j);
+            appendToTaskName(i, j);	// append "or"
             appendToTaskName(i, j+1);
             j += 2;
+            
         }
         
         if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("or") /* && (tags.get(i)[j-1].equals("VB") || tags.get(i)[j+1].equals("NN"))*/) {
-            if (parallelTasks == null) parallelTasks = new ArrayList<>();
+        	if (parallelTasks == null) parallelTasks = new ArrayList<>();
             parallelTasks.add(getCurrentTaskName()); 
+            currentTask = new ArrayList<>();
             
-            j = extractNextTask(i, j+1);
+            j = extractNextTask(i, j + 1);
             if (getCurrentTaskName().length() > 0) {
                 parallelTasks.add(getCurrentTaskName()); 
+                currentTask = new ArrayList<>();
             }
             
-            joinParallelTasksToProcess("OR", "Join", parallelTasks);
+            if (tokens.get(i)[j].equalsIgnoreCase("or")) j = handleOR(i, j);
         }
+        
         return j;
     }
 
@@ -331,14 +338,15 @@ public class BpmnExtractorEngine {
         Link.createLink(previousElement.getName() + " -> " + currentElement.getName(), previousElement, currentElement);
     }
 
-    private void joinParallelTasksToProcess(String splitName, String joinName, ArrayList<String> taskNames) {
-        if (taskNames.size() == 0) return;
+    private void joinParallelTasksToProcess(String splitName, String joinName) {
+        if (parallelTasks.size() == 0) return;
         
-        if (taskNames.size() == 1) {
+        if (parallelTasks.size() == 1) {
             previousElement = currentElement;
-            Element currentElement = Element.createElement(currentRole, taskNames.get(0), Element.TYPE.PARALLEL_GATEWAY);
+            Element newElement = Element.createElement(currentRole, parallelTasks.get(0), Element.TYPE.SERVICE_TASK);
             
-            Link.createLink(previousElement.getName() + " -> " + currentElement.getName(), previousElement, currentElement);
+            Link.createLink(previousElement.getName() + " -> " + newElement.getName(), previousElement, newElement);
+            currentElement = newElement;
 
         } else {    // more than one task
             Element split = Element.createElement(currentRole, splitName, Element.TYPE.PARALLEL_GATEWAY);
@@ -346,11 +354,11 @@ public class BpmnExtractorEngine {
             
             Element join = Element.createElement(currentRole, joinName, Element.TYPE.PARALLEL_GATEWAY);
             
-            for (int i = 0; i < taskNames.size(); i++) {
-                Element element = Element.createElement(currentRole, taskNames.get(i), Element.TYPE.SERVICE_TASK);
+            for (int i = 0; i < parallelTasks.size(); i++) {
+                Element newElement = Element.createElement(currentRole, parallelTasks.get(i), Element.TYPE.SERVICE_TASK);
                 
-                Link.createLink(split.getName() + " -> " + element.getName(), split, element);
-                Link.createLink(element.getName() + " -> " + join.getName(), element, join);
+                Link.createLink(split.getName() + " -> " + newElement.getName(), split, newElement);
+                Link.createLink(newElement.getName() + " -> " + join.getName(), newElement, join);
             }
             previousElement = currentElement;
             currentElement = join;
