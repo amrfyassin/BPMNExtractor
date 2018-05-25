@@ -282,8 +282,8 @@ public class BpmnExtractorEngine {
                 break;
 
             case "CC":
-//                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("and")) j = handleAND(i, j);
-                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("or")) j = handleOR(i, j);
+                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("and")) j = handleParallel(i, j, "and");
+                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("or")) j = handleParallel(i, j, "or");
                 joinParallelTasksToProcess("OR", "Join");
                 break;
                 
@@ -301,46 +301,30 @@ public class BpmnExtractorEngine {
         
         return ++j;
     }
-
-//    private int handleAND(int i, int j) {
-//        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("and") && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
-//            appendToTaskName(i, j);
-//            appendToTaskName(i, j+1);
-//            j += 2;
-//        }
-//        
-//        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("and") && tags.get(i)[j+1].contains("VB")) {
-//            markTaskReady();
-//            appendToTaskName(i, j+1);
-//            j += 2;
-//        }
-//        
-//        return j;
-//    }
     
-    private int handleOR(int i, int j) {
+    private int handleParallel(int i, int j, String ccToken) {
     	
-    	// Or between two nouns in the same task
-        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("or") && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
-            appendToTaskName(i, j);	// append "or"
+    	// Or/And between two nouns in the same task
+        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase(ccToken) && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
+            appendToTaskName(i, j);	// append ccToken
             appendToTaskName(i, j + 1);
             j += 2;
             
         }
         
-        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("or") /* && (tags.get(i)[j-1].equals("VB") || tags.get(i)[j+1].equals("NN"))*/) {
+        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase(ccToken) /* && (tags.get(i)[j-1].equals("VB") || tags.get(i)[j+1].equals("NN"))*/) {
         	if (parallelTasks == null) parallelTasks = new ArrayList<>();
             parallelTasks.add(getCurrentTaskName()); 
             currentTask = new ArrayList<>();
             
             j = extractNextTask(i, j + 1);
             if (taskReady && getCurrentTaskName().length() > 0) {
-                parallelTasks.add(getCurrentTaskName()); 
+            	if (validateTask()) parallelTasks.add(getCurrentTaskName());
                 currentTask = new ArrayList<>();
                 taskReady = false;
             }
             
-            if (j < tokens.get(i).length && tokens.get(i)[j].equalsIgnoreCase("or")) j = handleOR(i, j);
+            if (j < tokens.get(i).length && tokens.get(i)[j].equalsIgnoreCase(ccToken)) j = handleParallel(i, j, ccToken);
         }
         
         return j;
@@ -389,27 +373,8 @@ public class BpmnExtractorEngine {
     }
     
     private void addTaskToProcess() {
-        if (currentTask == null || currentTask.size() == 0) return;
-        
+    	if (!validateTask()) return;
         String currentTaskName = getCurrentTaskName();
-        boolean hasVerb = false;
-        for (int i = 0; i < currentTask.size(); i++) {
-            if (tags.get(currentSentence)[currentTask.get(0)].contains("NNP") 
-                    || tags.get(currentSentence)[currentTask.get(i)].contains("VB")) {
-                hasVerb = true;
-                break;
-            }
-            if (tags.get(currentSentence)[currentTask.get(i)].contains("VB")) {
-                hasVerb = true;
-                break;
-            }
-        }
-        
-        if (currentTask.size() == 1 || !hasVerb) {
-            // ignore collected tokens
-            currentTask = new ArrayList<>();
-            return;
-        }
         
         if (currentTaskName.length() > 0 && currentTaskName.contains(" ")) {
             System.out.println(taskNo++ + "\t: " + currentTaskName);
@@ -426,7 +391,32 @@ public class BpmnExtractorEngine {
         }
     }
     
-    private void appendToTaskName(int i, int j) {
+    private boolean validateTask() {
+        if (currentTask == null || currentTask.size() == 0) return false;
+        
+        boolean hasVerb = false;
+        for (int i = 0; i < currentTask.size(); i++) {
+            if (tags.get(currentSentence)[currentTask.get(0)].contains("NNP") 
+                    || tags.get(currentSentence)[currentTask.get(i)].contains("VB")) {
+                hasVerb = true;
+                break;
+            }
+            if (tags.get(currentSentence)[currentTask.get(i)].contains("VB")) {
+                hasVerb = true;
+                break;
+            }
+        }
+        
+        if (currentTask.size() == 1 || !hasVerb) {
+            // ignore collected tokens
+            currentTask = new ArrayList<>();
+            return false;
+        }
+        
+        return true;
+    }
+
+	private void appendToTaskName(int i, int j) {
         //if (currentTask == null) currentTask = new Task(tokens);
         currentSentence = i;
         currentTask.add(j);
