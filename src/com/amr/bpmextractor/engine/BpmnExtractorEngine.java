@@ -45,20 +45,21 @@ public class BpmnExtractorEngine {
     private String outputFile;
 
     private int taskNo;
-    ArrayList <Integer> currentTask;
-    int currentSentence;
+    private ArrayList <Integer> currentTask;
+    private int currentSentence;
+    private boolean taskReady;
 
-    String[] sentences;
-    ArrayList<String[]> tokens;
-    ArrayList<String[]> tags;
-    ArrayList<String[]> lemmas;
-    ArrayList<double[]> probs;
+    private String[] sentences;
+    private ArrayList<String[]> tokens;
+    private ArrayList<String[]> tags;
+    private ArrayList<String[]> lemmas;
+    private ArrayList<double[]> probs;
 
-    Process process;
-    Role currentRole;
-    Element previousElement;
-    Element currentElement;
-    ArrayList<String> parallelTasks;
+    private Process process;
+    private Role currentRole;
+    private Element previousElement;
+    private Element currentElement;
+    private ArrayList<String> parallelTasks;
 
     public BpmnExtractorEngine(String inputFile, String outputFile) {
         taskNo = 1;
@@ -73,6 +74,11 @@ public class BpmnExtractorEngine {
         probs = new ArrayList<>();
     }
 
+    /**
+     * It contains the main flow of analyzing the text, BPMN extraction and writing the output file.
+     *  
+     * @return the BPMN process after extraction
+     */
     public Process processText() {
         analyzePOS();
         extractBPMN();
@@ -81,6 +87,13 @@ public class BpmnExtractorEngine {
         return process;
     }
     
+    /**
+     * Analyzes the input text by:
+     * 1- Split the text into sentences
+     * 2- Split the sentence into tokens
+     * 3- Add part-of-speech (POS) tag for every token
+     * 4- Find root of token (lemma) 
+     */
     private void analyzePOS() {
         InputStream tokenModelIn = null;
         InputStream posModelIn = null;
@@ -93,16 +106,12 @@ public class BpmnExtractorEngine {
                 inputText += temp + "\n";
             }
             
+            // detect sentences in the paragraph
             InputStream is = new FileInputStream("models/en-sent.bin");
             SentenceModel sentenceModel = new SentenceModel(is);
-            
-            // feed the model to SentenceDetectorME class 
-            SentenceDetectorME sdetector = new SentenceDetectorME(sentenceModel);
-            
-            // detect sentences in the paragraph
+            SentenceDetectorME sdetector = new SentenceDetectorME(sentenceModel);            
             sentences = sdetector.sentDetect(inputText);
      
-            // print the sentences detected, to console
             for(int i = 0; i < sentences.length; i++){
                 System.out.println(sentences[i]);
     
@@ -119,15 +128,14 @@ public class BpmnExtractorEngine {
                 tags.add(posTagger.tag(tokens.get(i)));
                 probs.add(posTagger.probs());
                 
+                // Find lemma for every token
                 InputStream dictLemmatizer = new FileInputStream("models/en-lemmatizer.bin");
-                // loading the lemmatizer with dictionary
                 DictionaryLemmatizer lemmatizer = new DictionaryLemmatizer(dictLemmatizer);
                 lemmas.add(lemmatizer.lemmatize(tokens.get(i), tags.get(i)));
     
                 System.out.println("No.\t:\tTag\t:\tProbability\t\t:\tToken\t:\tLemma\n"
                         + "------------------------------------------------------------------------------------------");
                 for (int j = 0; j < tokens.get(i).length; j++) {
-                    // if (tags.get(i).equalsIgnoreCase("NN"))
                     System.out.println(j + "\t:\t" + tags.get(i)[j] + "\t:\t" + probs.get(i)[j]  
                             + "\t:\t" + tokens.get(i)[j] + "\t:\t" + lemmas.get(i)[j]);
                 }
@@ -153,9 +161,13 @@ public class BpmnExtractorEngine {
 //                System.out.println("currentSentence = " + currentSentence);
                 do {
                     j = extractNextTask(currentSentence, j);
+                    if (taskReady) {
+                    	addTaskToProcess();
+                    	taskReady = false;
+                    }
                 } while (j < tokens.get(currentSentence).length);
                 
-                addTaskToProcess();
+                addTaskToProcess();	// a task can not span two sentences.
             } while (++currentSentence < sentences.length);
 
             addEndEventToProcess();
@@ -163,12 +175,23 @@ public class BpmnExtractorEngine {
     }
 
     private int extractNextTask(int i, int j) {
+    	
+    	if (j < tokens.get(currentSentence).length) {
+    		do {
+    			j = extractNextToken(i, j);
+    			
+    		} while(!taskReady && j < tokens.get(currentSentence).length && currentTask.size() != 0);
+    	}
+    	
+    	return j;
+    }
+    
+    private int extractNextToken(int i, int j) {
         switch (tags.get(i)[j]) {
             case "VB":
             case "VBD":
             case "VBZ":
             case "VBG":
-                addTaskToProcess();
                 if (j > 0 && tokens.get(i)[j-1].equalsIgnoreCase("to") )
                     break;
                 
@@ -179,7 +202,7 @@ public class BpmnExtractorEngine {
                         || tokens.get(i)[j].equalsIgnoreCase("don’t")|| tokens.get(i)[j].equalsIgnoreCase("be"))
                     break;
                 
-                if (currentTask.size() > 0) addTaskToProcess();
+                if (currentTask.size() > 0) markTaskReady();
 
                 appendToTaskName(i, j);
                 break;
@@ -246,7 +269,7 @@ public class BpmnExtractorEngine {
                 
             case ".":
             case ":":
-                addTaskToProcess();
+                markTaskReady();
                 break;
 
             case "TO":
@@ -259,13 +282,14 @@ public class BpmnExtractorEngine {
                 break;
 
             case "CC":
-                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("and")) j = handleAND(i, j);
+//                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("and")) j = handleAND(i, j);
                 if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("or")) j = handleOR(i, j);
                 joinParallelTasksToProcess("OR", "Join");
                 break;
                 
             case "VBN":
-                if (j > 0 && tags.get(i)[j-1].equals("VB")) appendToTaskName(i, j);
+                if (j > 0 && (tags.get(i)[j-1].equals("VB") || tags.get(i)[j-1].equals("CC"))) 
+                	appendToTaskName(i, j);
                 break;
                 
             default:
@@ -273,33 +297,33 @@ public class BpmnExtractorEngine {
 
         }
         
-        if (currentTask.size() >= 6) addTaskToProcess();
+        if (currentTask.size() >= 6) markTaskReady();
         
         return ++j;
     }
 
-    private int handleAND(int i, int j) {
-        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("and") && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
-            appendToTaskName(i, j);
-            appendToTaskName(i, j+1);
-            j += 2;
-        }
-        
-        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("and") && tags.get(i)[j+1].contains("VB")) {
-            addTaskToProcess();
-            appendToTaskName(i, j+1);
-            j += 2;
-        }
-        
-        return j;
-    }
+//    private int handleAND(int i, int j) {
+//        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("and") && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
+//            appendToTaskName(i, j);
+//            appendToTaskName(i, j+1);
+//            j += 2;
+//        }
+//        
+//        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("and") && tags.get(i)[j+1].contains("VB")) {
+//            markTaskReady();
+//            appendToTaskName(i, j+1);
+//            j += 2;
+//        }
+//        
+//        return j;
+//    }
     
     private int handleOR(int i, int j) {
     	
     	// Or between two nouns in the same task
         if (j > 0 && tokens.get(i)[j].equalsIgnoreCase("or") && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
             appendToTaskName(i, j);	// append "or"
-            appendToTaskName(i, j+1);
+            appendToTaskName(i, j + 1);
             j += 2;
             
         }
@@ -310,21 +334,16 @@ public class BpmnExtractorEngine {
             currentTask = new ArrayList<>();
             
             j = extractNextTask(i, j + 1);
-            if (getCurrentTaskName().length() > 0) {
+            if (taskReady && getCurrentTaskName().length() > 0) {
                 parallelTasks.add(getCurrentTaskName()); 
                 currentTask = new ArrayList<>();
+                taskReady = false;
             }
             
-            if (tokens.get(i)[j].equalsIgnoreCase("or")) j = handleOR(i, j);
+            if (j < tokens.get(i).length && tokens.get(i)[j].equalsIgnoreCase("or")) j = handleOR(i, j);
         }
         
         return j;
-    }
-
-    private void appendToTaskName(int i, int j) {
-        //if (currentTask == null) currentTask = new Task(tokens);
-        currentSentence = i;
-        currentTask.add(j);
     }
     
     private void addStartEventToProcess() {
@@ -339,7 +358,7 @@ public class BpmnExtractorEngine {
     }
 
     private void joinParallelTasksToProcess(String splitName, String joinName) {
-        if (parallelTasks.size() == 0) return;
+        if (parallelTasks == null || parallelTasks.size() == 0) return;
         
         if (parallelTasks.size() == 1) {
             previousElement = currentElement;
@@ -365,10 +384,14 @@ public class BpmnExtractorEngine {
         }
     }
     
+    private void markTaskReady() {
+    	taskReady = true;
+    }
+    
     private void addTaskToProcess() {
-        String currentTaskName = getCurrentTaskName();
         if (currentTask == null || currentTask.size() == 0) return;
         
+        String currentTaskName = getCurrentTaskName();
         boolean hasVerb = false;
         for (int i = 0; i < currentTask.size(); i++) {
             if (tags.get(currentSentence)[currentTask.get(0)].contains("NNP") 
@@ -401,6 +424,12 @@ public class BpmnExtractorEngine {
             
             currentTask = new ArrayList<>();
         }
+    }
+    
+    private void appendToTaskName(int i, int j) {
+        //if (currentTask == null) currentTask = new Task(tokens);
+        currentSentence = i;
+        currentTask.add(j);
     }
     
     private String getCurrentTaskName()
