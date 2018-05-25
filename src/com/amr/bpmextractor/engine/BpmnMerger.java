@@ -25,13 +25,14 @@ import com.amr.bpmextractor.bpmnbuilder.Process;;
 public class BpmnMerger {
 	
 	public static void main(String[] args) {
-	    String processFolder = "sameProcess";
+	    String processFolder = "carloan";
+//	    String processFolder = "sameProcess";
 	    String inputPathPrefix = "data/" + processFolder + "/sample";
         String outputPathPrefix = "out/" + processFolder + "/sample";
         ArrayList<Process> processes = new ArrayList<>();
         Process mergedProcess = new Process("Merged");
 
-        int i = 3;
+        int i = 0;
 	    while (new File (inputPathPrefix + ++i + ".txt").exists()) {
     		String inputFile = inputPathPrefix + i + ".txt";
     		String outputFile = outputPathPrefix + i + ".xml";

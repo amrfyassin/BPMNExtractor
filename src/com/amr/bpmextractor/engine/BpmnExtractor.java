@@ -20,9 +20,13 @@ package com.amr.bpmextractor.engine;
 public class BpmnExtractor {
 	
 	public static void main(String[] args) {
-		int i = 3;
-		String inputFile = "data/unstructuredProcess" + i + ".txt";
-		String outputFile = "out/bpmn" + i + ".xml";
+		int i = 1;
+//		String inputFile = "data/unstructuredProcess" + i + ".txt";
+//		String outputFile = "out/bpmn" + i + ".xml";
+		
+		String inputFile = "data/employeeevaluation/sample" + i + ".txt";
+		String outputFile = "out/employeeevaluation/process" + i + ".xml";
+		
 
 		BpmnExtractorEngine pt = new BpmnExtractorEngine(inputFile, outputFile);
 		pt.processText();

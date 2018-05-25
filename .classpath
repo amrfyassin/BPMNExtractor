@@ -14,5 +14,7 @@
 	<classpathentry exported="true" kind="lib" path="/Users/amr/Documents/Downloads/Apache/Lucene/lucene-7.3.0/analysis/opennlp/lucene-analyzers-opennlp-7.3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/amr/Documents/Downloads/Apache/Lucene/lucene-7.3.0/analysis/opennlp/lib/opennlp-maxent-3.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/amr/Documents/Downloads/Apache/Lucene/lucene-7.3.0/analysis/opennlp/lib/opennlp-tools-1.8.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/amr/Documents/Downloads/Camunda/camunda-bpm-tomcat-7/lib/camunda-bpmn-model-7.8.0.jar"/>
+	<classpathentry kind="lib" path="/Users/amr/Documents/Downloads/Camunda/camunda-bpm-tomcat-7/lib/camunda-xml-model-7.8.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
