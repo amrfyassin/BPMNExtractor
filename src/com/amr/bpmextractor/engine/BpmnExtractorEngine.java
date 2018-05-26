@@ -364,6 +364,7 @@ public class BpmnExtractorEngine {
                 Link.createLink(newElement.getName() + " -> " + join.getName(), newElement, join);
             }
             previousElement = currentElement;
+            parallelTasks = new ArrayList<>();
             currentElement = join;
         }
     }
