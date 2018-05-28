@@ -192,6 +192,7 @@ public class BpmnExtractorEngine {
             case "VBD":
             case "VBZ":
             case "VBG":
+            case "VBP":
                 if (j > 0 && tokens.get(i)[j-1].equalsIgnoreCase("to") )
                     break;
                 
@@ -204,10 +205,6 @@ public class BpmnExtractorEngine {
                 
                 if (currentTask.size() > 0) markTaskReady();
 
-                appendToTaskName(i, j);
-                break;
-                
-            case "VBP":
                 appendToTaskName(i, j);
                 break;
 
@@ -282,9 +279,11 @@ public class BpmnExtractorEngine {
                 break;
 
             case "CC":
-                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("and")) j = handleParallel(i, j, "and");
-                if (getCurrentTaskName().length() > 0 && tokens.get(i)[j].equalsIgnoreCase("or")) j = handleParallel(i, j, "or");
-                joinParallelTasksToProcess("OR", "Join");
+            	String ccToken = tokens.get(i)[j];
+                if (getCurrentTaskName().length() > 0 && (ccToken.equalsIgnoreCase("and") ||ccToken.equalsIgnoreCase("or"))) {
+                	j = handleParallel(i, j, ccToken);
+                	joinParallelTasksToProcess(ccToken.toUpperCase(), ccToken.toUpperCase() + "-Join");
+                }
                 break;
                 
             case "VBN":
@@ -303,13 +302,14 @@ public class BpmnExtractorEngine {
     }
     
     private int handleParallel(int i, int j, String ccToken) {
+    	if (j <= 0) return j;
     	
     	// Or/And between two nouns in the same task
-        if (j > 0 && tokens.get(i)[j].equalsIgnoreCase(ccToken) && tags.get(i)[j-1].equals("NN") && tags.get(i)[j+1].equals("NN")) {
+        if ((tags.get(i)[j-1].contains("NN") ||  tags.get(i)[j-1].contains("JJ"))
+        		&& (tags.get(i)[j+1].contains("NN") ||  tags.get(i)[j+1].contains("JJ"))) {
             appendToTaskName(i, j);	// append ccToken
             appendToTaskName(i, j + 1);
             j += 2;
-            
         }
         
         if (j > 0 && tokens.get(i)[j].equalsIgnoreCase(ccToken) /* && (tags.get(i)[j-1].equals("VB") || tags.get(i)[j+1].equals("NN"))*/) {
