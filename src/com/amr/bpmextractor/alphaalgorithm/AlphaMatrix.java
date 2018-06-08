@@ -145,7 +145,14 @@ public class AlphaMatrix {
         
         int i = 0;
         for (String taskName : tasks) {
-            elements[i] = Element.createElement(role, taskName, Element.TYPE.SERVICE_TASK);
+            int taskType;
+            switch (taskName.toLowerCase()) {
+                case "start":     taskType = Element.TYPE.START_EVENT; break;
+                case "end":     taskType = Element.TYPE.END_EVENT; break;
+                default: taskType = Element.TYPE.START_EVENT; break;
+            }
+            
+            elements[i] = Element.createElement(role, taskName, taskType);
             inElements[i] = elements[i];
             outElements[i] = elements[i];
             i++;
@@ -154,43 +161,43 @@ public class AlphaMatrix {
         for(i = 0; i < size; i++) {
             for(int j = 0; j < i; j ++) {
                 switch (navCube[i][j]) {
-                    case CONNECTION.LEFT:                       	
-                    	addInputJoin(role, i); // TODO Check if needed
-                    	addOutputSplit(role, j); // TODO Check if needed
+                    case CONNECTION.LEFT:                           
+                        addInputJoin(role, i); // TODO Check if needed
+                        addOutputSplit(role, j); // TODO Check if needed
                         Link.createLink(elements[j].getName() + " -> " + elements[i].getName(), outElements[j], inElements[i]);
                         break;
                         
                     case CONNECTION.RIGHT:
-                    	addOutputSplit(role, i); // TODO Check if needed
-                    	addInputJoin(role, j); // TODO Check if needed
+                        addOutputSplit(role, i); // TODO Check if needed
+                        addInputJoin(role, j); // TODO Check if needed
                         Link.createLink(elements[i].getName() + " -> " + elements[j].getName(), outElements[i], inElements[j]);
                         break;
 
                     case CONNECTION.PARALLEL:
-                    	Element split;
-                    	if (inElements[i].getName().equalsIgnoreCase("split")) {
-                    		split = inElements[i];
-                    		
-                    	} else if (inElements[j].getName().equalsIgnoreCase("split")) {
-                    		split = inElements[j];
-                    		
-                    	} else {
-                    		split = Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY);
-                    	}
-                    	
-                        Element join; 
-                        if (outElements[i].getName().equalsIgnoreCase("join")){
-                        	join = outElements[i];
-                        	
-                        } else if (outElements[j].getName().equalsIgnoreCase("join")) {
-                        	join = outElements[j];
-                        	
+                        Element split;
+                        if (inElements[i].getName().equalsIgnoreCase("split")) {
+                            split = inElements[i];
+                            
+                        } else if (inElements[j].getName().equalsIgnoreCase("split")) {
+                            split = inElements[j];
+                            
                         } else {
-                        	join = Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY);
+                            split = Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY);
                         }
                         
-                   		replaceLinks(elements[i], split, join);
-                   		replaceLinks(elements[j], split, join);
+                        Element join; 
+                        if (outElements[i].getName().equalsIgnoreCase("join")){
+                            join = outElements[i];
+                            
+                        } else if (outElements[j].getName().equalsIgnoreCase("join")) {
+                            join = outElements[j];
+                            
+                        } else {
+                            join = Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY);
+                        }
+                        
+                           replaceLinks(elements[i], split, join);
+                           replaceLinks(elements[j], split, join);
                         
                         Link.createLink(split + " -> " + elements[i].getName(), split, inElements[i]);
                         Link.createLink(split + " -> " + elements[j].getName(), split, inElements[j]);
@@ -214,35 +221,35 @@ public class AlphaMatrix {
         return process;
     }
 
-	private void addOutputSplit(Role role, int index) {
-		if (outElements[index].getOutGoingLinks().size() == 1 && outElements[index] == elements[index]) {
-		    Element split = null;
-//		    Link link = elements[index].getOutGoingLinks().get(0);
-//			if (link.getSourceElement().getName().equalsIgnoreCase("split")) {
-//				split = link.getSourceElement();
-//			}
-		    
-		    split = split == null ? Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY) : split;
-		    replaceLinks(elements[index], inElements[index], split);
-		    Link.createLink("split" + " -> " + elements[index].getName(), outElements[index], split);
-		    outElements[index] = split;
-		}
-	}
+    private void addOutputSplit(Role role, int index) {
+        if (outElements[index].getOutGoingLinks().size() == 1 && outElements[index] == elements[index]) {
+            Element split = null;
+//            Link link = elements[index].getOutGoingLinks().get(0);
+//            if (link.getSourceElement().getName().equalsIgnoreCase("split")) {
+//                split = link.getSourceElement();
+//            }
+            
+            split = split == null ? Element.createElement(role, "split", Element.TYPE.PARALLEL_GATEWAY) : split;
+            replaceLinks(elements[index], inElements[index], split);
+            Link.createLink("split" + " -> " + elements[index].getName(), outElements[index], split);
+            outElements[index] = split;
+        }
+    }
 
-	private void addInputJoin(Role role, int index) {
-		if (inElements[index].getIncomingLinks().size() == 1 && inElements[index] == elements[index]) {
-			Element join = null;
-//			Link link = elements[index].getIncomingLinks().get(0);
-//			if (link.getSourceElement().getName().equalsIgnoreCase("join")) {
-//				join = link.getSourceElement();
-//			}
-			
-			join = join == null ? Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY) : join;
-			replaceLinks(elements[index], join, outElements[index]);
-		    Link.createLink("join" + " -> " + elements[index].getName(), join, inElements[index]);
-		    inElements[index] = join;
-		}
-	}
+    private void addInputJoin(Role role, int index) {
+        if (inElements[index].getIncomingLinks().size() == 1 && inElements[index] == elements[index]) {
+            Element join = null;
+//            Link link = elements[index].getIncomingLinks().get(0);
+//            if (link.getSourceElement().getName().equalsIgnoreCase("join")) {
+//                join = link.getSourceElement();
+//            }
+            
+            join = join == null ? Element.createElement(role, "join", Element.TYPE.PARALLEL_GATEWAY) : join;
+            replaceLinks(elements[index], join, outElements[index]);
+            Link.createLink("join" + " -> " + elements[index].getName(), join, inElements[index]);
+            inElements[index] = join;
+        }
+    }
     
     private void replaceLinks(Element task, Element input, Element output) {
         Link[] incomingLinks = new Link[task.getIncomingLinks().size()];
@@ -253,12 +260,12 @@ public class AlphaMatrix {
 
         for (Link link : incomingLinks) {
             Element sourceElement = link.getSourceElement();
-        	Link.createLink(input.getName(), sourceElement, input);
-        	link.delete();
+            Link.createLink(input.getName(), sourceElement, input);
+            link.delete();
         }
         
         for (Link link : outgoingLinks) {
-        	Element targetElement = link.getTargetElement();
+            Element targetElement = link.getTargetElement();
             Link.createLink(output.getName(), output, targetElement);
             link.delete();
         }
