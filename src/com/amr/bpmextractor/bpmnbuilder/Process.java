@@ -23,16 +23,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class Process {
 
-    private final int incrementX = 200;
-    private final int incrementY = 300;
+    private final int incrementX = 150;
+    private final int incrementY = 200;
 	
     private String name;
     private String uuid;
     private ArrayList<Role> roles;
+    private HashSet<Element> calculatedElements;
 
     public Process(String name){
         this.name = name;
@@ -147,8 +149,7 @@ public class Process {
         final int originalY = 100;
         int locationX = originalX;
         int locationY = originalY;
-
-        
+        calculatedElements = new HashSet<>();
         
         if (roles != null && roles.size() > 0) {
             for (int i = 0, len = roles.size(); i < len; i++ ) {
@@ -181,14 +182,18 @@ public class Process {
 				
                 roles.get(i).setLocation(minX - 100, minY - 100);
                 roles.get(i).setWidth(maxX - minX + 300);
-                roles.get(i).setHeight(maxY - minY + 600);
+                roles.get(i).setHeight(maxY - minY + 300);
             }
         }
     }
     
  
     private void calcElement(Element currentElement) {
+    	
+    	if (calculatedElements.contains(currentElement)) return;	// to avoid infinite loops
+    	
     	ArrayList<Link> inLinks = currentElement.getIncomingLinks();
+    	calculatedElements.add(currentElement);
 
     	if (inLinks.size() == 0) {
     		return;
@@ -211,7 +216,6 @@ public class Process {
 			int locationX = previousElement.getLocationX() + incrementX;
 			int locationY = (previousElement.getLocationY() + ((inLinks.size() - 1) * incrementY)) / inLinks.size();
 			currentElement.setLocation(locationX, locationY);
-			
 		}
     	
     	for (Link link : currentElement.getOutGoingLinks()) {
