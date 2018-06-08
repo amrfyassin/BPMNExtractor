@@ -147,9 +147,11 @@ public class AlphaMatrix {
         for (String taskName : tasks) {
             int taskType;
             switch (taskName.toLowerCase()) {
-                case "start":     taskType = Element.TYPE.START_EVENT; break;
-                case "end":     taskType = Element.TYPE.END_EVENT; break;
-                default: taskType = Element.TYPE.START_EVENT; break;
+            	case "begin":   taskType = Element.TYPE.START_EVENT; break;
+            	case "start":	taskType = Element.TYPE.START_EVENT; break;
+                case "end":		taskType = Element.TYPE.END_EVENT; break;
+                case "stop":    taskType = Element.TYPE.END_EVENT; break;
+                default: 		taskType = Element.TYPE.SERVICE_TASK; break;
             }
             
             elements[i] = Element.createElement(role, taskName, taskType);
