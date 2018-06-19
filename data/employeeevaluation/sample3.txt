@@ -1,0 +1,3 @@
+the employer responds to a list of carefully worded yes-or-no questions, each of which may be weighted with a predetermined value.
+This method is based on a set of employer-developed criteria—which can include behaviors or completed projects against which employees are judged. 
+The employer assigns each criterion a numerical value, usually on a ten point scale. 
