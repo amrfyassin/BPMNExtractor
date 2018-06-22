@@ -1,8 +1,8 @@
-package com.amr.ui;
+package com.amr.bpmextractor.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -23,7 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 
 import com.amr.bpmextractor.alphaalgorithm.AlphaMatrix;
 import com.amr.bpmextractor.bpmnbuilder.Process;
@@ -31,16 +30,18 @@ import com.amr.bpmextractor.engine.BpmnExtractorEngine;
 
 public class BPMExtractorUI extends JPanel{
 
-    private JFrame frmBpmExtractor;
+	private static final long serialVersionUID = 1L;
+	private JFrame frmBpmExtractor;
     private JTextField txtOutputDir;
     private JTextField txtInputDir;
     private JFileChooser inputFileChooser;
     private JFileChooser outputFileChooser;
+    private JTextArea logArea;
     
-    File inputDirectory;
-    File outputDirectory;
-    File[] inputFiles;
-    File[] outputFiles;
+    private File inputDirectory;
+    private File outputDirectory;
+    private File[] inputFiles;
+    private File[] outputFiles;
 
     /**
      * Launch the application.
@@ -62,17 +63,16 @@ public class BPMExtractorUI extends JPanel{
      * Create the application.
      */
     public BPMExtractorUI() {
-        initialize();
+    	inputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/data/sameProcess");
+//    	inputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/data/samplemulti");
+    	outputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/out");
+    	initialize();
     }
 
     /**
      * Initialize the contents of the frame.
      */
     private void initialize() {
-        
-        inputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/data");
-        outputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/out");
-        
         inputFileChooser = new JFileChooser();
         inputFileChooser.setDialogTitle("Select Input Directory");
         inputFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -85,7 +85,7 @@ public class BPMExtractorUI extends JPanel{
         
         frmBpmExtractor = new JFrame();
         frmBpmExtractor.setTitle("BPM Extractor");
-        frmBpmExtractor.setBounds(50, 50, 850, 400);
+        frmBpmExtractor.setBounds(50, 50, 950, 600);
         frmBpmExtractor.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         initInputPane();
@@ -111,20 +111,6 @@ public class BPMExtractorUI extends JPanel{
                     inputDirectory = inputFileChooser.getSelectedFile();
                     txtInputDir.setText(inputDirectory.getAbsolutePath());
                     System.out.println("Input Directory: " + inputDirectory.getAbsolutePath() + ".");
-                    inputFiles = inputDirectory.listFiles();
-
-                    int len = inputFiles.length;
-                    if (len <= 0) {
-                        JOptionPane.showMessageDialog(panel_Input, "Folder contains no files !!", "Empty Folder", JOptionPane.WARNING_MESSAGE);
-                    }
-                    
-                    outputFiles = new File[len];
-                    
-                    for (int i = 0; i < len; i++) {
-                        System.out.println(inputFiles[i].getPath());
-                        outputFiles[i] = new File(inputFiles[i].getPath() + ".xml");
-                        System.out.println(outputFiles[i].getPath());
-                    }
 
                 } else {
                     System.out.println("Input directory selection was cancelled by user.");
@@ -200,12 +186,24 @@ public class BPMExtractorUI extends JPanel{
         btnCreateBPMNOnly.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 
+            	long t0 = System.currentTimeMillis();
+            	initializeFiles();
+            	logArea.setText("");
+            	System.out.println("Start Processing input files for BMPN Extraction");
                 for (int i = 0; i < inputFiles.length; i++) {
+                    System.out.println("Input File : " + inputFiles[i].getPath());
+                    System.out.println("Output File: " + outputFiles[i].getPath());
                     BpmnExtractorEngine pt = new BpmnExtractorEngine(inputFiles[i].getPath(), outputFiles[i].getPath());
                     pt.processText();
+                    System.out.println("\n\n");
+                    logArea.update(logArea.getGraphics());
                 }
+                
+            	System.out.println("Finished Processing input files for BMPN Extraction in " + (System.currentTimeMillis() - t0) / 1000 + "Sec.");
+                logArea.update(logArea.getGraphics());
             }
         });
+        
         btnCreateBPMNOnly.setToolTipText("Create BPMN Only");
         GridBagConstraints gbc_btnCreateBPMNOnly = new GridBagConstraints();
         gbc_btnCreateBPMNOnly.insets = new Insets(0, 0, 5, 5);
@@ -216,7 +214,8 @@ public class BPMExtractorUI extends JPanel{
         JButton btnCreateMergedBPMN = new JButton("Create Merged BPMN");
         btnCreateMergedBPMN.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                
+            	
+            	initializeFiles();
                 ArrayList<Process> processes = new ArrayList<>();
                 Process mergedProcess = new Process("Merged");
                 
@@ -253,29 +252,41 @@ public class BPMExtractorUI extends JPanel{
         gbc_btnClose.gridx = 3;
         gbc_btnClose.gridy = 3;
         panel_Input.add(btnClose, gbc_btnClose);
-        
+    }
+    
+    private void initializeFiles() {
+    	
+        inputFiles = inputDirectory.listFiles();
+    	int len = inputFiles.length;
+        if (len <= 0) {
+            JOptionPane.showMessageDialog(frmBpmExtractor, "Folder contains no files !!", "Empty Folder", JOptionPane.WARNING_MESSAGE);
+        }
+
+        outputFiles = new File[len];
+        for (int i = 0; i < len; i++) {
+            outputFiles[i] = new File(outputDirectory.getPath() + File.separator + inputFiles[i].getName() + ".xml");
+        }
     }
 
     private void initOutputPane() {
         JPanel panel_Output = new JPanel();
+        panel_Output.setPreferredSize(new Dimension(80, 450));
+
         frmBpmExtractor.getContentPane().add(panel_Output, BorderLayout.SOUTH);
-        panel_Output.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        panel_Output.setLayout(new BorderLayout(0, 0));
         
-        JTextArea textArea = new JTextArea(5, 150);
-        textArea.setLineWrap(true);
-        textArea.setEditable(false);
-        textArea.setWrapStyleWord(true);
-        JScrollPane scrollV = new JScrollPane (textArea);
-        JScrollPane scrollH = new JScrollPane (textArea);
-        scrollV.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollH.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        
+        logArea = new JTextArea(30, 80);
+        logArea.setToolTipText("Output logs");
+        logArea.setLineWrap(true);
+        logArea.setEditable(false);
+        logArea.setWrapStyleWord(true);
+
         //Forward the outputStream to the text area
-        PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
+        PrintStream printStream = new PrintStream(new CustomOutputStream2());
         System.setOut(printStream);
         System.setErr(printStream);
-        
-        panel_Output.add(textArea);        
+        JScrollPane scrollPane = new JScrollPane(logArea);
+        panel_Output.add(scrollPane, BorderLayout.NORTH);
     }
     
     public class CustomOutputStream extends OutputStream {
@@ -290,6 +301,16 @@ public class BPMExtractorUI extends JPanel{
             textArea.append(String.valueOf((char)b));
             textArea.setCaretPosition(textArea.getDocument().getLength());
             textArea.update(textArea.getGraphics());
+        }
+    }
+    
+    public class CustomOutputStream2 extends OutputStream {
+
+        @Override
+        public void write(int b) throws IOException {
+            logArea.append(String.valueOf((char)b));
+            logArea.setCaretPosition(logArea.getDocument().getLength());
+//            logArea.update(logArea.getGraphics());
         }
     }
 }

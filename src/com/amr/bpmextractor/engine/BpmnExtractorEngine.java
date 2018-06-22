@@ -133,11 +133,11 @@ public class BpmnExtractorEngine {
                 DictionaryLemmatizer lemmatizer = new DictionaryLemmatizer(dictLemmatizer);
                 lemmas.add(lemmatizer.lemmatize(tokens.get(i), tags.get(i)));
     
-                System.out.println("No.\t:\tTag\t:\tProbability\t\t:\tToken\t:\tLemma\n"
+                System.out.println("No.\t: Tag\t: Probability\t\t: Token\t: Lemma\n"
                         + "------------------------------------------------------------------------------------------");
                 for (int j = 0; j < tokens.get(i).length; j++) {
-                    System.out.println(j + "\t:\t" + tags.get(i)[j] + "\t:\t" + probs.get(i)[j]  
-                            + "\t:\t" + tokens.get(i)[j] + "\t:\t" + lemmas.get(i)[j]);
+                    System.out.println(j + "\t: " + tags.get(i)[j] + "\t: " + probs.get(i)[j]  
+                            + "\t: " + tokens.get(i)[j] + "\t: " + lemmas.get(i)[j]);
                 }
             }
 
