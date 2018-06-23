@@ -23,9 +23,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 import com.amr.bpmextractor.alphaalgorithm.AlphaMatrix;
 import com.amr.bpmextractor.bpmnbuilder.Process;
+import com.amr.bpmextractor.bpmnbuilder.Role;
 import com.amr.bpmextractor.engine.BpmnExtractorEngine;
 
 public class BPMExtractorUI extends JPanel{
@@ -191,12 +193,12 @@ public class BPMExtractorUI extends JPanel{
             	logArea.setText("");
             	System.out.println("Start Processing input files for BMPN Extraction");
                 for (int i = 0; i < inputFiles.length; i++) {
-                    System.out.println("Input File : " + inputFiles[i].getPath());
+                    System.out.println("\nInput File : " + inputFiles[i].getPath());
                     System.out.println("Output File: " + outputFiles[i].getPath());
                     BpmnExtractorEngine pt = new BpmnExtractorEngine(inputFiles[i].getPath(), outputFiles[i].getPath());
                     pt.processText();
                     System.out.println("\n\n");
-                    logArea.update(logArea.getGraphics());
+//                    logArea.update(logArea.getGraphics());
                 }
                 
             	System.out.println("Finished Processing input files for BMPN Extraction in " + (System.currentTimeMillis() - t0) / 1000 + "Sec.");
@@ -218,19 +220,25 @@ public class BPMExtractorUI extends JPanel{
             	initializeFiles();
                 ArrayList<Process> processes = new ArrayList<>();
                 Process mergedProcess = new Process("Merged");
+                Role role = new Role(mergedProcess, "Employee");
                 
+            	System.out.println("Start Processing input files for BMPN Extraction and Merging");
+
                 for (int i = 0; i < inputFiles.length; i++) {
+                	System.out.println("\nInput File : " + inputFiles[i].getPath());
+                    System.out.println("Output File: " + outputFiles[i].getPath());
                     BpmnExtractorEngine extractor = new BpmnExtractorEngine(inputFiles[i].getPath(), outputFiles[i].getPath());
                     processes.add(extractor.processText());
                 }
                 
+            	System.out.println("Finished Processing input files for BMPN Extraction and Merging\n");
+            	System.out.println("Start creating the merged process.");
                 AlphaMatrix matrix = new AlphaMatrix(mergedProcess);
-                for (Process process : processes) {
-                    matrix.addProcess(process);
-                }
-                
+                for (Process process : processes) matrix.addProcess(process);
                 matrix.toString();
                 matrix.getProcess().writeBMPNFile(outputDirectory + "mergedprocess.xml");
+            	System.out.println("Finished creating the merged process.");
+                logArea.update(logArea.getGraphics());
             }
         });
         btnCreateMergedBPMN.setToolTipText("Create BPMN and Merge all processes in one master process.");        
@@ -282,35 +290,21 @@ public class BPMExtractorUI extends JPanel{
         logArea.setWrapStyleWord(true);
 
         //Forward the outputStream to the text area
-        PrintStream printStream = new PrintStream(new CustomOutputStream2());
+        PrintStream printStream = new PrintStream(new CustomOutputStream());
         System.setOut(printStream);
         System.setErr(printStream);
         JScrollPane scrollPane = new JScrollPane(logArea);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);;
         panel_Output.add(scrollPane, BorderLayout.NORTH);
     }
     
-    public class CustomOutputStream extends OutputStream {
-        private JTextArea textArea;
-
-        public CustomOutputStream(JTextArea textArea) {
-            this.textArea = textArea;
-        }
-
-        @Override
-        public void write(int b) throws IOException {
-            textArea.append(String.valueOf((char)b));
-            textArea.setCaretPosition(textArea.getDocument().getLength());
-            textArea.update(textArea.getGraphics());
-        }
-    }
-    
-    public class CustomOutputStream2 extends OutputStream {
+    private class CustomOutputStream extends OutputStream {
 
         @Override
         public void write(int b) throws IOException {
             logArea.append(String.valueOf((char)b));
-            logArea.setCaretPosition(logArea.getDocument().getLength());
-//            logArea.update(logArea.getGraphics());
+//            logArea.setCaretPosition(logArea.getDocument().getLength());
+            logArea.update(logArea.getGraphics());
         }
     }
 }
