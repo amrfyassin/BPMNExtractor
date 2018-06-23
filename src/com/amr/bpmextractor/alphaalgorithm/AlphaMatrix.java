@@ -29,9 +29,9 @@ public class AlphaMatrix {
 
     public static class CONNECTION{
         public static final char NONE        = '#';
-        public static final char RIGHT       = '⟹';
-        public static final char LEFT        = '⟸';
-        public static final char PARALLEL    = '‖';
+        public static final char RIGHT       = '>';
+        public static final char LEFT        = '<';
+        public static final char PARALLEL    = '|';
     }
     
     private char[][] navCube;
@@ -47,7 +47,7 @@ public class AlphaMatrix {
         tasks = new ArrayList<>();
         navCube = new char[5][5];
         for (int i = 0 ; i < navCube.length; i++) {
-            for(int j = 0; j < navCube[i].length; j++) navCube[i][j] = '#';
+            for(int j = 0; j < navCube[i].length; j++) navCube[i][j] = CONNECTION.NONE;
         }
         processName = process.getName();
         roleName = process.getRoles().get(0).getName();
@@ -105,7 +105,7 @@ public class AlphaMatrix {
             char[][] newMatrix = new char[newSize][newSize];
             
             for (int i = 0; i < newMatrix.length; i++) {
-                for(int j = 0; j < newMatrix[i].length; j++) newMatrix[i][j] = '#';
+                for(int j = 0; j < newMatrix[i].length; j++) newMatrix[i][j] = CONNECTION.NONE;
             }
             
             for (int i = 0; i < navCube.length; i++) {
