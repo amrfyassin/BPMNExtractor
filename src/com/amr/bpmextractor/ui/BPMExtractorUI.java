@@ -190,18 +190,16 @@ public class BPMExtractorUI extends JPanel{
                 
             	long t0 = System.currentTimeMillis();
             	initializeFiles();
-            	logArea.setText("");
-            	System.out.println("Start Processing input files for BMPN Extraction");
+            	logArea.setText("Start Processing input files for BMPN Extraction\n");
                 for (int i = 0; i < inputFiles.length; i++) {
-                    System.out.println("\nInput File : " + inputFiles[i].getPath());
-                    System.out.println("Output File: " + outputFiles[i].getPath());
+                	logArea.append("\nInput File : " + inputFiles[i].getPath() + "\n");
+                    logArea.append("Output File: " + outputFiles[i].getPath() + "\n\n");
                     BpmnExtractorEngine pt = new BpmnExtractorEngine(inputFiles[i].getPath(), outputFiles[i].getPath());
                     pt.processText();
-                    System.out.println("\n\n");
-//                    logArea.update(logArea.getGraphics());
+                    logArea.append("\n\n");
                 }
                 
-            	System.out.println("Finished Processing input files for BMPN Extraction in " + (System.currentTimeMillis() - t0) / 1000 + "Sec.");
+                logArea.append("Finished Processing input files for BMPN Extraction in " + (System.currentTimeMillis() - t0) / 1000 + "Sec.");
                 logArea.update(logArea.getGraphics());
             }
         });
@@ -222,22 +220,22 @@ public class BPMExtractorUI extends JPanel{
                 Process mergedProcess = new Process("Merged");
                 Role role = new Role(mergedProcess, "Employee");
                 
-            	System.out.println("Start Processing input files for BMPN Extraction and Merging");
+                logArea.setText("Start Processing input files for BMPN Extraction and Merging\n");
 
                 for (int i = 0; i < inputFiles.length; i++) {
-                	System.out.println("\nInput File : " + inputFiles[i].getPath());
-                    System.out.println("Output File: " + outputFiles[i].getPath());
+                	logArea.append("\nInput File : " + inputFiles[i].getPath() + "\n");
+                	logArea.append("Output File: " + outputFiles[i].getPath() + "\n\n");
                     BpmnExtractorEngine extractor = new BpmnExtractorEngine(inputFiles[i].getPath(), outputFiles[i].getPath());
                     processes.add(extractor.processText());
                 }
                 
-            	System.out.println("Finished Processing input files for BMPN Extraction and Merging\n");
-            	System.out.println("Start creating the merged process.");
+                logArea.append("Finished Processing input files for BMPN Extraction and Merging\n\n");
+                logArea.append("Start creating the merged process.\n");
                 AlphaMatrix matrix = new AlphaMatrix(mergedProcess);
                 for (Process process : processes) matrix.addProcess(process);
                 matrix.toString();
                 matrix.getProcess().writeBMPNFile(outputDirectory + "mergedprocess.xml");
-            	System.out.println("Finished creating the merged process.");
+            	logArea.append("\nFinished creating the merged process.\n");
                 logArea.update(logArea.getGraphics());
             }
         });
@@ -288,6 +286,7 @@ public class BPMExtractorUI extends JPanel{
         logArea.setLineWrap(true);
         logArea.setEditable(false);
         logArea.setWrapStyleWord(true);
+        logArea.setAutoscrolls(true);
 
         //Forward the outputStream to the text area
         PrintStream printStream = new PrintStream(new CustomOutputStream());
@@ -303,8 +302,11 @@ public class BPMExtractorUI extends JPanel{
         @Override
         public void write(int b) throws IOException {
             logArea.append(String.valueOf((char)b));
-//            logArea.setCaretPosition(logArea.getDocument().getLength());
-            logArea.update(logArea.getGraphics());
+            int len = logArea.getText().length();
+            if (len % 100 == 0) {
+            	logArea.moveCaretPosition(len);
+            	logArea.update(logArea.getGraphics());
+            }
         }
     }
 }
