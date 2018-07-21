@@ -66,7 +66,6 @@ public class BPMExtractorUI extends JPanel{
      */
     public BPMExtractorUI() {
     	inputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/data/sameProcess");
-//    	inputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/data/samplemulti");
     	outputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/out");
     	initialize();
     }
@@ -99,7 +98,6 @@ public class BPMExtractorUI extends JPanel{
         frmBpmExtractor.getContentPane().add(panel_Input, BorderLayout.CENTER);
         GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths    = new int[] {150, 450, 50, 50, 50};
-        //gridBagLayout.rowHeights    = new int[] {0, 0, 0, 0, 0};
         panel_Input.setLayout(gridBagLayout);
 
         JButton btnChooseInputDir = new JButton("Choose");
@@ -119,6 +117,7 @@ public class BPMExtractorUI extends JPanel{
                 }
             }
         });
+        
         GridBagConstraints gbc_btnChooseInputDir = new GridBagConstraints();
         gbc_btnChooseInputDir.insets = new Insets(0, 0, 1, 1);
         gbc_btnChooseInputDir.gridx = 2;
@@ -142,6 +141,7 @@ public class BPMExtractorUI extends JPanel{
                 }
             }
         });
+        
         GridBagConstraints gbc_btnChooseOutputDir = new GridBagConstraints();
         gbc_btnChooseOutputDir.insets = new Insets(0, 0, 1, 1);
         gbc_btnChooseOutputDir.gridx = 2;
@@ -239,6 +239,7 @@ public class BPMExtractorUI extends JPanel{
                 logArea.update(logArea.getGraphics());
             }
         });
+        
         btnCreateMergedBPMN.setToolTipText("Create BPMN and Merge all processes in one master process.");        
         GridBagConstraints gbc_btnCreateMergedBPMNOnly = new GridBagConstraints();
         gbc_btnCreateMergedBPMNOnly.insets = new Insets(0, 0, 5, 5);
@@ -252,6 +253,7 @@ public class BPMExtractorUI extends JPanel{
             	frmBpmExtractor.dispose();
             }
         });
+        
         btnClose.setToolTipText("Close.");        
         GridBagConstraints gbc_btnClose = new GridBagConstraints();
         gbc_btnClose.insets = new Insets(0, 0, 5, 5);
