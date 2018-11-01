@@ -65,8 +65,8 @@ public class BPMExtractorUI extends JPanel{
      * Create the application.
      */
     public BPMExtractorUI() {
-    	inputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/data/sameProcess");
-    	outputDirectory = new File("/Users/amr/Documents/Personal/GUC/ThesisWorkspaces/workspace2/BpmnExtractor/out");
+    	inputDirectory = new File("data/simpleProcess");
+    	outputDirectory = new File("out");
     	initialize();
     }
 
@@ -234,7 +234,7 @@ public class BPMExtractorUI extends JPanel{
                 AlphaMatrix matrix = new AlphaMatrix(mergedProcess);
                 for (Process process : processes) matrix.addProcess(process);
                 matrix.toString();
-                matrix.getProcess().writeBMPNFile(outputDirectory + "mergedprocess.xml");
+                matrix.getProcess().writeBMPNFile(outputDirectory.getPath() + File.separatorChar + "mergedprocess.xml");
             	logArea.append("\nFinished creating the merged process.\n");
                 logArea.update(logArea.getGraphics());
             }
