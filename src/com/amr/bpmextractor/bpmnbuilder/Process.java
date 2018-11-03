@@ -195,7 +195,7 @@ public class Process {
     	ArrayList<Link> inLinks = currentElement.getIncomingLinks();
     	calculatedElements.add(currentElement);
 
-    	if (inLinks.size() == 0) {
+    	if (inLinks.size() == 0) { // Start Task
     		return;
     		
     	} else if (inLinks.size()  == 1) { // Single Predecessor
@@ -211,8 +211,14 @@ public class Process {
 			int locationY = previousElement.getLocationY() + ((orderWithinSiblings - 1) * incrementY);
 			currentElement.setLocation(locationX, locationY);
 
-		} else {
-			Element previousElement = inLinks.get(0).getSourceElement();
+		} else { // multiple predecessor
+			int i = 0;
+			Element previousElement;
+			do {
+				previousElement = inLinks.get(i).getSourceElement();
+				i++;
+			} while (previousElement.getLocationX() == 0  && previousElement.getLocationY() == 0  && i < inLinks.size());
+			
 			int locationX = previousElement.getLocationX() + incrementX;
 			int locationY = (previousElement.getLocationY() + ((inLinks.size() - 1) * incrementY)) / inLinks.size();
 			currentElement.setLocation(locationX, locationY);
